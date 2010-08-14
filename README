@@ -1,0 +1,33 @@
+
+total #entries 
+$ wc -l pois.tsv
+201,583
+
+# freq of uniq name/place combos
+$ cat pois.tsv | ./emit_name_place.rb | sort | uniq -c | perl -plne's/.*?(\d+ ).*/$1/' > uniq_counts
+ 192646 1 # ie only combo of name/place
+   3245 2 # ie there are 3245 cases of 2 pois with same name/place
+    436 3 
+    213 4 
+     30 5 
+     14 6 
+      3 7 
+      1 9 
+      1 8 
+      1 15  # ??? 1 case where there are 15 pois with same name/place ?!?!
+
+uniq poi name/place
+$ cat pois.tsv | ./emit_name_place.rb | sort | uniq > pois.uniq.tsv
+$ wc -l pois.uniq.tsv
+196,590
+
+unique names across pois
+$ cat pois.tsv | ./emit_name.rb | sort | uniq | wc -l
+167,344
+
+
+
+
+
+
+
