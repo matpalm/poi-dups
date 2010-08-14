@@ -25,6 +25,8 @@ unique names across pois
 $ cat pois.tsv | ./emit_name.rb | sort | uniq | wc -l
 167,344
 
+run deduping
+head -n 100 pois.uniq.tsv | ./shingling.rb | sort -nr | head
 
 
 

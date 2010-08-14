@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'set'
+
 N_GRAM_LEN = 3
 
 class String
@@ -25,19 +26,13 @@ class String
 
 end
 
-class Poi
-  attr_accessor :pid, :name, :place
-  def initialize *args
-    self.pid,self.name,self.place = args
-  end
-end
-
+Poi = Struct.new :name, :place
 pois = STDIN.collect { |line| Poi.new(*line.chomp.split("\t")) }
 
-def compare poi1,poi2 
-  similarity = poi1.name.jaccard_similarity_to poi2.name
-  return if similarity==0
-  puts [similarity,poi1.name,poi2.name].join("\t") 
+def compare poi1, poi2 
+  name_similarity = poi1.name.jaccard_similarity_to poi2.name
+  return if name_similarity==0
+  printf "%0.5f %050s %050s\n", name_similarity, "#{poi1.name} (#{poi1.place})", "#{poi2.name} (#{poi2.place})"
 end
 
 # order n-squared! yeah baby! 
