@@ -16,17 +16,37 @@ $ cat pois.tsv | ./emit_name_place.rb | sort | uniq -c | perl -plne's/.*?(\d+ ).
       1 8 
       1 15  # ??? 1 case where there are 15 pois with same name/place ?!?!
 
-uniq poi name/place
-$ cat pois.tsv | ./emit_name_place.rb | sort | uniq > pois.uniq.tsv
+extract exact dups, keeping only one
+$ cat pois.tsv | ./exact_dups.rb > pois.uniq.tsv 2> exact_dups.ids
 $ wc -l pois.uniq.tsv
 196,590
+$ wc -l exact_dups.ids
+3,944
 
-unique names across pois
-$ cat pois.tsv | ./emit_name.rb | sort | uniq | wc -l
-167,344
+run near duplicate detection (0.6)
+$ cat pois.uniq.tsv | ./near_dups.rb > near_dups.out   
+(similarity id1 id2)
+0.666666666666667	  1 2
+0.578947368421053	  1 3
+0.657142857142857	  0 1
+...
+4323 lines (took 28m)
 
-run deduping
-head -n 100 pois.uniq.tsv | ./shingling.rb | sort -nr | head
+connected components
+$ cat dups.out | ./connected_components.rb 
+425823 425821
+432060 431980
+1067389 1067384
+1107522 1107523 1107521 1107524 1105365
+1070593 1098180
+1122825 1122818
+1100334 378607
+...
+
+
+
+
+
 
 
 
