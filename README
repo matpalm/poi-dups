@@ -1,4 +1,11 @@
 
+sql to dump table
+select p.id as poi_id, pl.name as poi_name, places.name as place_name from pois p join places on p.place_id=places.id join poi_localisations pl on pl.poi_id=p.id
+save as pois.csv
+
+
+$ ./csv_to_tsv.rb < pois.csv > pois.tsv
+
 total #entries 
 $ wc -l pois.tsv
 201,583
@@ -12,8 +19,8 @@ $ cat pois.tsv | ./emit_name_place.rb | sort | uniq -c | perl -plne's/.*?(\d+ ).
      30 5 
      14 6 
       3 7 
-      1 9 
-      1 8 
+     ub 1 9 
+bCfkk      1 8 
       1 15  # ??? 1 case where there are 15 pois with same name/place ?!?!
 
 extract exact dups, keeping only one
@@ -33,15 +40,16 @@ $ cat pois.uniq.tsv | ./near_dups.rb > near_dups.out
 4323 lines (took 28m)
 
 connected components
-$ cat dups.out | ./connected_components.rb 
-425823 425821
-432060 431980
-1067389 1067384
-1107522 1107523 1107521 1107524 1105365
-1070593 1098180
-1122825 1122818
-1100334 378607
+$ cat near_dups.out | ./connected_components.rb | sort -nr > connected_components.out
+1.0 425823 425821
+1.0 432060 431980
+0.999 1067389 1067384
+0.86 1107522 1107523 1107521 1107524 1105365
+0.76 1070593 1098180
+0.76 1122825 1122818
+0.7 1100334 378607
 ...
+
 
 
 
