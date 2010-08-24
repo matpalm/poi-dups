@@ -33,5 +33,7 @@ end
 
 g.each_connected_component do |vertexs| 
   max_res_in_group = max_res_for_pid.max_res_for vertexs
-  puts ([max_res_in_group] + vertexs).join("\t")
+  printf "%0.3f\t", max_res_in_group
+  puts vertexs.join("\t")
 end
+

@@ -1,28 +1,15 @@
 
-sql to dump table
-select p.id as poi_id, pl.name as poi_name, places.name as place_name from pois p join places on p.place_id=places.id join poi_localisations pl on pl.poi_id=p.id
-save as pois.csv
+1. sql to dump pois
 
+select p.id as poi_id, pl.name as poi_name, places.id as place_id
+from pois p join places on p.place_id=places.id 
+join poi_localisations pl on pl.poi_id=p.id
 
-$ ./csv_to_tsv.rb < pois.csv > pois.tsv
+2. sql to dump places
 
-total #entries 
-$ wc -l pois.tsv
-201,583
+select id,name,full_name from places
 
-# freq of uniq name/place combos
-$ cat pois.tsv | ./emit_name_place.rb | sort | uniq -c | perl -plne's/.*?(\d+ ).*/$1/' > uniq_counts
- 192646 1 # ie only combo of name/place
-   3245 2 # ie there are 3245 cases of 2 pois with same name/place
-    436 3 
-    213 4 
-     30 5 
-     14 6 
-      3 7 
-     ub 1 9 
-bCfkk      1 8 
-      1 15  # ??? 1 case where there are 15 pois with same name/place ?!?!
-
+-- don't bother with next step
 extract exact dups, keeping only one
 $ cat pois.tsv | ./exact_dups.rb > pois.uniq.tsv 2> exact_dups.ids
 $ wc -l pois.uniq.tsv
@@ -30,8 +17,16 @@ $ wc -l pois.uniq.tsv
 $ wc -l exact_dups.ids
 3,944
 
+split into 4 files
+$ ./split_based_on_places.rb < pois.tsv
+
 run near duplicate detection (0.6)
-$ cat pois.uniq.tsv | ./near_dups.rb > near_dups.out   
+cat pois.p0.tsv | ./near_dups.rb > near_dups.p0.out &
+cat pois.p1.tsv | ./near_dups.rb > near_dups.p1.out &
+cat pois.p2.tsv | ./near_dups.rb > near_dups.p2.out &
+cat pois.p3.tsv | ./near_dups.rb > near_dups.p3.out &
+wait
+
 (similarity id1 id2)
 0.666666666666667	  1 2
 0.578947368421053	  1 3
@@ -39,18 +34,16 @@ $ cat pois.uniq.tsv | ./near_dups.rb > near_dups.out
 ...
 4323 lines (took 28m)
 
-connected components
-$ cat near_dups.out | ./connected_components.rb | sort -nr > connected_components.out
-1.0 425823 425821
-1.0 432060 431980
-0.999 1067389 1067384
-0.86 1107522 1107523 1107521 1107524 1105365
-0.76 1070593 1098180
-0.76 1122825 1122818
-0.7 1100334 378607
-...
+$ cat near_dups.p*.out | ./connected_components.rb > connected_components.out
+1.000     420197  420147
+1.000     1112845 1112889 1072699 1072704 1112865 1112878
+0.869     1037033 1037044 1037047
+0.826     1076554 381583  381207
+0.619     401746  401702
+1.000     399763  1041146
 
-
+make human readable (result.csv)
+$ ./reportify.rb
 
 
 
