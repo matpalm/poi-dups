@@ -1,4 +1,5 @@
-near duplicate detection with ngram weighting
+near duplicate detection 
+(using token frequency weighting to dictate ngram contribution to similarity)
 
 1. sql to dump pois (pois.tsv)
 sql> select p.id as poi_id, pl.name as poi_name, places.id as place_id
