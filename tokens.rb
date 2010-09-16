@@ -3,12 +3,14 @@
 require 'yaml'
 
 # -*- coding: utf-8 -*-
-@token_freq = Hash.new(0)
-@total_tokens = 0
+@bigram_freq = Hash.new(0)
 STDIN.each do |line|
-  line.chomp.gsub("’","'").downcase.split.each do |token|
-    @token_freq[token] += 1
-    @total_tokens += 1
+  utf_chars = line.chomp.downcase.split(//u)
+  next unless utf_chars.length > 2
+  (0..utf_chars.length-2).each do |n|
+    bigram = utf_chars.slice(n,2).join
+    puts "[#{bigram}]"
+    @bigram_freq[bigram] += 1
   end
 end
 
@@ -19,8 +21,8 @@ end
 
 # emit only non 1 freqs
 # assume all other keys are freq 1
-@token_freq.each do |token,freq|
-  if freq!=1
+@bigram_freq.each do |token,freq|
+#  if freq!=1
     puts [freq,normalised(freq),token].join("\t")
-  end
+#  end
 end
