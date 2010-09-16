@@ -1,13 +1,14 @@
+near duplicate detection with ngram weighting
 
 1. sql to dump pois (pois.tsv)
-
 sql> select p.id as poi_id, pl.name as poi_name, places.id as place_id
 sql>  from pois p join places on p.place_id=places.id 
 sql>  join poi_localisations pl on pl.poi_id=p.id
+(or hit public api)
 
 2. sql to dump places (places.tsv)
-
 sql> select id,name,full_name from places
+(or hit public api)
 
 3. split into 4 files
 
