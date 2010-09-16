@@ -35,8 +35,11 @@ $ cat near_dups.p*.out | ./connected_components.rb > connected_components.out
 
 $ ./reportify.rb
 
+# WIP
 
-
+time cat pois.tsv | cut -f2 | ./tokens.rb > token_to_norm_freq.tsv
+2sec
+33,000 lines
 
 
 
