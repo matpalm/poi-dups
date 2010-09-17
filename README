@@ -15,13 +15,16 @@ sql> select id,name,full_name from places
 
 $ ./split_based_on_places.rb < pois.tsv
 
+------------------------
+-- VERSION 1
+
 4. run near duplicate detection
 
-$ cat pois.p0.tsv | ./near_dups.rb > near_dups.p0.out &
-$ cat pois.p1.tsv | ./near_dups.rb > near_dups.p1.out &
-$ cat pois.p2.tsv | ./near_dups.rb > near_dups.p2.out &
-$ cat pois.p3.tsv | ./near_dups.rb > near_dups.p3.out &
-$ wait
+cat pois.p0.tsv | ./near_dups.rb > near_dups.p0.out &
+cat pois.p1.tsv | ./near_dups.rb > near_dups.p1.out &
+cat pois.p2.tsv | ./near_dups.rb > near_dups.p2.out &
+cat pois.p3.tsv | ./near_dups.rb > near_dups.p3.out &
+wait
 
 5. run connected components analysis
 
@@ -37,18 +40,35 @@ $ cat near_dups.p*.out | ./connected_components.rb > connected_components.out
 
 $ ./reportify.rb
 
-# WIP
+------------------------
+-- VERSION 2
 
-time cat pois.tsv | cut -f2 | ./tokens.rb > token_to_norm_freq.tsv
-2sec
-33,000 lines
+4. generate tokens hash
 
-# original version for testing
-cat pois.test.tsv | ./near_dups.rb > near_dups.out
-20s
+$ ./generate_tokens_freq_lookup.rb < pois.tsv
 
-# version that uses lists instead of sets, should be the same
-cat pois.test.tsv | ./near_dups_v2.rb > near_dups.v2.out
+5. process
+
+cat pois.p0.tsv | ./near_dups_v2.rb > near_dups_v2.p0.out &
+cat pois.p1.tsv | ./near_dups_v2.rb > near_dups_v2.p1.out &
+cat pois.p2.tsv | ./near_dups_v2.rb > near_dups_v2.p2.out &
+cat pois.p3.tsv | ./near_dups_v2.rb > near_dups_v2.p3.out &
+wait
+
+6. run connected components analysis
+
+$ cat near_dups_v2.p*.out | ./connected_components.rb > connected_components.out
+1.000     420197  420147
+1.000     1112845 1112889 1072699 1072704 1112865 1112878
+0.869     1037033 1037044 1037047
+0.826     1076554 381583  381207
+0.619     401746  401702
+1.000     399763  1041146
+
+7. make into csv
+
+$ ./reportify.rb
+
 
 
 

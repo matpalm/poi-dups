@@ -1,3 +1,5 @@
 pois*tsv
 .RData
 .Rhistory
+freq.dat.gz
+connected_components.out

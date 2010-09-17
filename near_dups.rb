@@ -9,7 +9,7 @@ class String
   def shingles
     return @cached if @cached       
     n_grams = Set.new
-    utf_chars = self.split(//u)
+    utf_chars = " #{self} ".split(//u)
     (0..utf_chars.length-N_GRAM_LEN).each do |n|    
       n_grams << utf_chars.slice(n,N_GRAM_LEN).join
     end     
@@ -45,8 +45,8 @@ place_to_pois.each do |place, poi_ids|
       poi2 = pid_to_name[poi_ids[j]]
       name_similarity = poi1.jaccard_similarity_to poi2
       next unless name_similarity > MIN_RESEMBLANCE
-      #puts [name_similarity,poi_ids[i],poi_ids[j]].join("\t")
-      printf "XXX %0.5f %5d %5d %50s %50s\n", name_similarity, i,j, poi1,poi2
+      puts [name_similarity,poi_ids[i],poi_ids[j]].join("\t")
+      #printf "XXX %0.5f %5d %5d %50s %50s\n", name_similarity, i,j, poi1,poi2
     end
   end
 end
