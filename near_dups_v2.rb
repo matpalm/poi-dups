@@ -6,7 +6,11 @@ MIN_RESEMBLANCE = 0.4
 
 class String
 
-  def shingles
+  def term_weighted_ngrams
+    
+  end
+
+  def phrase_weighted_ngrams
     return @cached if @cached       
 
     n_grams = []
@@ -36,7 +40,7 @@ class String
 
     union = intersection = 0.0
 
-    s1,s2 = shingles.clone, other.shingles.clone
+    s1,s2 = phrase_weighted_ngrams.clone, other.phrase_weighted_ngrams.clone
 
     while !(s1.empty? || s2.empty?)
       puts 
