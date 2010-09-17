@@ -8,21 +8,59 @@ class String
 
   def shingles
     return @cached if @cached       
-    n_grams = Set.new
+    n_grams = []
     utf_chars = self.split(//u)
     (0..utf_chars.length-N_GRAM_LEN).each do |n|    
       n_grams << utf_chars.slice(n,N_GRAM_LEN).join
     end     
-    @cached = n_grams
+    @cached = n_grams.sort.uniq
   end
 
   def jaccard_similarity_to other
     return 1.0 if other==self
-    sa = shingles
-    sb = other.shingles
-    numerator = (sa.intersection sb).size
-    denominator = (sa.union sb).size        
-    numerator.to_f / denominator  
+    puts "----\ncomparing [#{self}] to [#{other}]"
+
+    union = 0
+    intersection = 0
+
+    i1 = i2 = 0
+    s1,s2 = shingles.clone, other.shingles.clone
+
+    while !(s1.empty? || s2.empty?)
+      puts 
+      puts "s1=#{s1.inspect}"
+      puts "s2=#{s2.inspect}"
+
+      b1,b2 = s1.first, s2.first
+
+      if b1==b2
+        puts "same"
+        intersection += 1
+        union += 1
+        s1.shift
+        s2.shift
+      elsif b1 < b2
+        puts "b1 < b2"
+	s1.shift
+	union += 1
+      else # b1 > b2
+        puts "b1 > b2"
+	s2.shift
+	union += 1
+      end
+
+      puts "union=#{union} intersection=#{intersection}"
+
+    end
+
+    puts "final"
+    puts "s1=#{s1.inspect}"
+    puts "s2=#{s2.inspect}"
+
+    # what ever is left counts for the union size
+    union += s1.size + s2.size
+      
+    intersection.to_f / union
   end
 
 end
