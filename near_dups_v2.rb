@@ -8,22 +8,34 @@ class String
 
   def shingles
     return @cached if @cached       
+
     n_grams = []
     utf_chars = self.split(//u)
     (0..utf_chars.length-N_GRAM_LEN).each do |n|    
       n_grams << utf_chars.slice(n,N_GRAM_LEN).join
     end     
-    @cached = n_grams.sort.uniq
+
+    non_unique_ngrams = n_grams.map{ |n| [n,1] }
+
+    grouped_unique_ngrams = non_unique_ngrams.group_by { |nw| nw[0] }
+
+    unique_ngrams = []
+    grouped_unique_ngrams.keys.sort.each do |ngram|
+      weights = grouped_unique_ngrams[ngram].map { |nw| nw[1] }
+      weight_sum = weights.inject(&:+)
+      average_weight = weight_sum.to_f / weights.size
+      unique_ngrams << [ ngram, average_weight ]
+    end
+
+    @cached = unique_ngrams
   end
 
   def jaccard_similarity_to other
     return 1.0 if other==self
     puts "----\ncomparing [#{self}] to [#{other}]"
 
-    union = 0
-    intersection = 0
+    union = intersection = 0.0
 
-    i1 = i2 = 0
     s1,s2 = shingles.clone, other.shingles.clone
 
     while !(s1.empty? || s2.empty?)
@@ -31,22 +43,24 @@ class String
       puts "s1=#{s1.inspect}"
       puts "s2=#{s2.inspect}"
 
-      b1,b2 = s1.first, s2.first
+      b1,w1 = s1.first
+      b2,w2 = s2.first
 
       if b1==b2
         puts "same"
-        intersection += 1
-        union += 1
+	average = (w1.to_f + w2)/2
+        intersection += average
+        union += average
         s1.shift
         s2.shift
       elsif b1 < b2
         puts "b1 < b2"
 	s1.shift
-	union += 1
+	union += w1
       else # b1 > b2
         puts "b1 > b2"
 	s2.shift
-	union += 1
+	union += w2
       end
 
       puts "union=#{union} intersection=#{intersection}"

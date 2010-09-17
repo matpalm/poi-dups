@@ -43,8 +43,12 @@ time cat pois.tsv | cut -f2 | ./tokens.rb > token_to_norm_freq.tsv
 2sec
 33,000 lines
 
+# original version for testing
+cat pois.test.tsv | ./near_dups.rb > near_dups.out
+20s
 
-
+# version that uses lists instead of sets, should be the same
+cat pois.test.tsv | ./near_dups_v2.rb > near_dups.v2.out
 
 
 
