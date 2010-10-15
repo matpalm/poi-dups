@@ -50,6 +50,8 @@ group_idx poi_id
 
 7. make into csv
 
+(first need to populate false_positives.tsv)
+
 $ ./reportify.rb 
 
 
