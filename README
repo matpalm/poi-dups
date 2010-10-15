@@ -13,67 +13,44 @@ sql> select id,name,full_name from places
 
 2.5 cleanup last run
 
-$ rm pois.p*tsv near_dups_v2.p*out
+$ rm *out
 
 3. split into 4 files
 
 $ ./split_based_on_places.rb < pois.tsv
 
-------------------------
--- VERSION 1
-- each ngram is weighted the same
-
-4. run near duplicate detection
-
-cat pois.p0.tsv | ./near_dups.rb > near_dups.p0.out &
-cat pois.p1.tsv | ./near_dups.rb > near_dups.p1.out &
-cat pois.p2.tsv | ./near_dups.rb > near_dups.p2.out &
-cat pois.p3.tsv | ./near_dups.rb > near_dups.p3.out &
-wait
-
-5. run connected components analysis
-
-$ cat near_dups.p*.out | ./connected_components.rb > connected_components.out
-1.000     420197  420147
-1.000     1112845 1112889 1072699 1072704 1112865 1112878
-0.869     1037033 1037044 1037047
-0.826     1076554 381583  381207
-0.619     401746  401702
-1.000     399763  1041146
-
-6. make into csv
-
-$ ./reportify.rb
-
-------------------------
--- VERSION 2
-- ngrams weighted based on the frequency of the tokens they come from.
-
 4. generate tokens hash
 
-$ cut -f2 pois.tsv | ./generate_tokens_freq_lookup.rb
+$ echo | ./generate_tokens_freq_lookup.rb # for dup ver v1; ie all ngrams worth 1
+$ cut -f2 pois.tsv | ./generate_tokens_freq_lookup.rb # for dup ver v2; ngrams weighted
 
 5. process
 
-cat pois.p0.tsv | ./near_dups_v2.rb > near_dups_v2.p0.out &
-cat pois.p1.tsv | ./near_dups_v2.rb > near_dups_v2.p1.out &
-cat pois.p2.tsv | ./near_dups_v2.rb > near_dups_v2.p2.out &
-cat pois.p3.tsv | ./near_dups_v2.rb > near_dups_v2.p3.out &
+cat pois.p0.out | ./near_dups_v2.rb > near_dups_v2.p0.out &
+cat pois.p1.out | ./near_dups_v2.rb > near_dups_v2.p1.out &
+cat pois.p2.out | ./near_dups_v2.rb > near_dups_v2.p2.out &
+cat pois.p3.out | ./near_dups_v2.rb > near_dups_v2.p3.out &
 wait
+sort -n near_dups_v2.p*.out > near_dups_v2.out
+
+resemblance		    poi_id_1	poi_id_2
+0.621121695897491	    365107	365533
+0.794606978416781	    365343	365487
+0.643269950967987	    364899	364911
 
 6. run connected components analysis
 
-$ cat near_dups_v2.p*.out | ./connected_components.rb > connected_components.out
-1.000     420197  420147
-1.000     1112845 1112889 1072699 1072704 1112865 1112878
-0.869     1037033 1037044 1037047
-0.826     1076554 381583  381207
-0.619     401746  401702
-1.000     399763  1041146
+$ cat near_dups_v2.out | ./connected_components.rb > connected_components.out
+
+group_idx poi_id
+0 364343
+0 364265
+1 364817
+1 364823
 
 7. make into csv
 
-$ ./reportify.rb
+$ ./reportify.rb 
 
 
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 N = 4
 files = []
-files = (0...N).map{ |n| File.open("pois.p#{n}.tsv",'w') }
+files = (0...N).map{ |n| File.open("pois.p#{n}.out",'w') }
 STDIN.each do |line|
   next if line =~ /^poi_id/
   place = line.chomp.split("\t").last

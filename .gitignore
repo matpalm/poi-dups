@@ -1,6 +1,7 @@
 pois*tsv
 places*tsv
+*out
 .RData
 .Rhistory
 freq.dat.gz
-connected_components.out
+result.csv
