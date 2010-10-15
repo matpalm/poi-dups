@@ -48,10 +48,10 @@ group_idx poi_id
 1 364817
 1 364823
 
-7. make into csv
+7. build false positive exclusion list
+$ ./extract_false_positives.rb < false_positives_from_cam.csv > false_positives.tsv
 
-(first need to populate false_positives.tsv)
-
+8. make report
 $ ./reportify.rb 
 
 
