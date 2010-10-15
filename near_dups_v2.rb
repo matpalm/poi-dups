@@ -1,31 +1,40 @@
 #!/usr/bin/env ruby
 require 'zlib'
+require 'tokens'
 
 N_GRAM_LEN = 2
-MIN_RESEMBLANCE = 0.4
+MIN_RESEMBLANCE = 0.6
 
 class String
 
-  def term_weighted_ngrams    
+  # standard ngrams
+  def ngrams    
+    return @_ngrams if @_ngrams
     n_grams = []
-    utf_chars = " #{self} ".split(//u)
+    whitespace_padding = " " * (N_GRAM_LEN-1)
+    utf_chars = (whitespace_padding + self + whitespace_padding).split(//u)
     (0..utf_chars.length-N_GRAM_LEN).each do |n|    
       n_grams << utf_chars.slice(n,N_GRAM_LEN).join
     end     
-    weighted_ngrams = n_grams.map{ |n| [ n, @@token_freqs[self] ] }    
-#    puts "weighted_ngrams=#{weighted_ngrams.inspect}"
-    weighted_ngrams
+    @_ngrams = n_grams
   end
 
-  def phrase_weighted_ngrams
-    return @cached if @cached       
+  # ngrams weighted based on frequency of the token they are produced from
+  def term_weighted_ngrams    
+    ngrams.map{ |n| [ n, @@token_freqs[self] ] }    
+  end
 
+  # phrase broken into tokens
+  # ngrams per token weighted based on that tokens frequency
+  # weight of unique ngram derived by average of weights
+  def phrase_weighted_ngrams
+    return @_phrase_weighted_ngrams if @_phrase_weighted_ngrams
+    
     non_unique_ngrams = []
-    self.split.each do |token|
+    self.tokens.each do |token|
       non_unique_ngrams += token.term_weighted_ngrams
     end
 
-#    puts "non_unique_ngrams #{non_unique_ngrams.inspect}"
     grouped_unique_ngrams = non_unique_ngrams.group_by { |nw| nw[0] }
 
     unique_ngrams = []
@@ -36,56 +45,43 @@ class String
       unique_ngrams << [ ngram, average_weight ]
     end
 
-    @cached = unique_ngrams
+    @_phrase_weighted_ngrams = unique_ngrams
   end
 
+  # jaccard similarity metric that allows fuzzy set membership (ie 0 to 1)
   def jaccard_similarity_to other
     return 1.0 if other==self
-#    puts "----\ncomparing [#{self}] to [#{other}]"
 
     union = intersection = 0.0
 
-    s1,s2 = phrase_weighted_ngrams.clone, other.phrase_weighted_ngrams.clone
-
-    while !(s1.empty? || s2.empty?)
-#      puts 
-#      puts "s1=#{s1.inspect}"
-#      puts "s2=#{s2.inspect}"
-
-      b1,w1 = s1.first
-      b2,w2 = s2.first
-
-      if b1==b2
-#        puts "same"
-	average = (w1.to_f + w2)/2
+    set1, set2 = phrase_weighted_ngrams.clone, other.phrase_weighted_ngrams.clone
+    while !(set1.empty? || set2.empty?)
+      ngram1, weight1 = set1.first
+      ngram2, weight2 = set2.first
+      
+      if ngram1 == ngram2
+	average = (weight1.to_f + weight2)/2
         intersection += average
         union += average
-        s1.shift
-        s2.shift
-      elsif b1 < b2
-#        puts "b1 < b2"
-	s1.shift
-	union += w1
-      else # b1 > b2
-#        puts "b1 > b2"
-	s2.shift
-	union += w2
+        set1.shift
+        set2.shift
+      elsif ngram1 < ngram2
+	set1.shift
+	union += weight1
+      else # ngram1 > ngram2
+	set2.shift
+	union += weight2
       end
-
-#      puts "union=#{union} intersection=#{intersection}"
 
     end
 
- #   puts "final"
- #   puts "s1=#{s1.inspect}"
- #   puts "s2=#{s2.inspect}"
-
     # what ever is left counts for the union size
-    union += s1.size + s2.size
-      
+    set1.each { |ngram,weight| union += weight }
+    set2.each { |ngram,weight| union += weight }
+    
     intersection.to_f / union
   end
-
+  
 end
 
 # read token freqs
@@ -94,13 +90,11 @@ file = Zlib::GzipReader.open('freq.dat.gz')
 file.close
 
 # parse stdin
-pid_to_name = {}            # { 3424 => 'bobs cafe', ... }
-place_to_pois = {}          # { 'sydney' => [3424, 234, 3453], ... }
-
+pid_to_name = {}     # { 3424 => 'bobs cafe', ... }
+place_to_pois = {}   # { 'sydney' => [3424, 234, 3453], ... }
 STDIN.each do |line| 
   next if line =~ /^poi_id/
-  pid,poi_name,place = line.chomp.split("\t")
-
+  pid,poi_name,type,place = line.chomp.split("\t") 
   pid_to_name[pid] = poi_name
   place_to_pois[place] ||= []
   place_to_pois[place] << pid

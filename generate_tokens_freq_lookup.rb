@@ -1,19 +1,15 @@
 #!/usr/bin/env ruby
 require 'zlib'
+require 'tokens'
 
 freq = Hash.new(0)
 STDIN.each do |line|
-  line.downcase.split.each do |token|
+  line.tokens.each do |token|
     freq[token] += 1
   end
 end
 
-def normalised n
-  # 1.0 / n
-  1.0 / (Math.log(n)+1)
-end
-
-# covert into simpler hash with default 1
+# convert into normalised hash with default 1
 freq2 = Hash.new(1)
 freq.each do |token,n|
   if n != 1

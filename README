@@ -11,12 +11,17 @@ sql>  join poi_localisations pl on pl.poi_id=p.id
 sql> select id,name,full_name from places
 (or hit public api)
 
+2.5 cleanup last run
+
+$ rm pois.p*tsv near_dups_v2.p*out
+
 3. split into 4 files
 
 $ ./split_based_on_places.rb < pois.tsv
 
 ------------------------
 -- VERSION 1
+- each ngram is weighted the same
 
 4. run near duplicate detection
 
@@ -42,10 +47,11 @@ $ ./reportify.rb
 
 ------------------------
 -- VERSION 2
+- ngrams weighted based on the frequency of the tokens they come from.
 
 4. generate tokens hash
 
-$ ./generate_tokens_freq_lookup.rb < pois.tsv
+$ cut -f2 pois.tsv | ./generate_tokens_freq_lookup.rb
 
 5. process
 

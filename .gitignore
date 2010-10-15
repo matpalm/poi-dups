@@ -1,4 +1,5 @@
 pois*tsv
+places*tsv
 .RData
 .Rhistory
 freq.dat.gz
